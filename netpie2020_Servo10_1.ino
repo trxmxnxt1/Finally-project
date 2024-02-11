@@ -18,7 +18,7 @@ PubSubClient client(espClient);
 #define UTC_OFFSET     7
 #define UTC_OFFSET_DST 0
 
-int relayPin = 27;  // กำหนดขา Relay
+#define buzzer 5 // Buzzer
 int setHour, setMinute, setSec, onSet;
 int hr, minute, sec;
 char msg[1000];
@@ -80,6 +80,10 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
 void setup() {
   Serial.begin(115200);
+  // Start Buzzer
+  pinMode(buzzer, OUTPUT);
+  digitalWrite(buzzer, LOW);
+  // END Buzzer
   Serial.println();
   Serial.print("Connecting to ");
   Serial.println(ssid);
@@ -97,11 +101,11 @@ void setup() {
 
   client.setServer(mqtt_server, mqtt_port);
   client.setCallback(callback);
-  pinMode(relayPin, OUTPUT);
+
 
   configTime(UTC_OFFSET * 3600, UTC_OFFSET_DST, NTP_SERVER);
 
-   pinMode(13, OUTPUT);
+  pinMode(13, OUTPUT);
   myservo.attach(13, 544, 2400); // Servo
   digitalWrite(13, LOW);
 }
