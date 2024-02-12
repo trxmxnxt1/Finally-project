@@ -3,8 +3,8 @@
 #include <Wire.h>
 #include <ESP32_Servo.h>
 
-char ssid[] = "thiramanat_2.4G";
-char pass[] = "newin11111";
+char ssid[] = "Luv";
+char pass[] = "12345678";
 const char* mqtt_server = "broker.netpie.io";
 const int mqtt_port = 1883;
 const char* mqtt_Client = "ef7491af-610c-4c0a-9a28-1b4139cea365";
@@ -19,6 +19,7 @@ PubSubClient client(espClient);
 #define UTC_OFFSET_DST 0
 
 #define buzzer 5 // Buzzer
+#define led 18
 int setHour, setMinute, setSec, onSet;
 int hr, minute, sec;
 char msg[1000];
@@ -44,6 +45,7 @@ void reconnect() {
       client.subscribe("@msg/timer/setHr");
       client.subscribe("@msg/timer/setMinute");
       client.subscribe("@msg/timer/setSec");
+      client.subscribe("@msg/timer/onSet");
     }
     else {
       Serial.print("failed, rc=");
@@ -62,21 +64,29 @@ void callback(char* topic, byte* payload, unsigned int length) {
   for (int i = 0; i < length; i++) {
     message = message + (char)payload[i];
   }
-
-  if (strcmp(topic, "@msg/timer/setHr") == 0) {
-    setHour = message.toInt();
-    Serial.println(setHour);
+  // print arrive msg
+  if (strcmp(topic, "@msg/timer/onSet") == 0) {
+    if (message == "on") {
+      onSet = 1;
+    } else {
+      onSet = 0;
+    }
   }
-  if (strcmp(topic, "@msg/timer/setMinute") == 0) {
-    setMinute = message.toInt();
-    Serial.println(setMinute);
-  }
-  if (strcmp(topic, "@msg/timer/setSec") == 0) {
-    setSec = message.toInt();
-    Serial.println(setSec);
+  if (onSet) {
+    if (strcmp(topic, "@msg/timer/setHr") == 0) {
+      setHour = message.toInt();
+      Serial.println(setHour);
+    }
+    if (strcmp(topic, "@msg/timer/setMinute") == 0) {
+      setMinute = message.toInt();
+      Serial.println(setMinute);
+    }
+    if (strcmp(topic, "@msg/timer/setSec") == 0) {
+      setSec = message.toInt();
+      Serial.println(setSec);
+    }
   }
 }
-
 
 void setup() {
   Serial.begin(115200);
@@ -102,10 +112,11 @@ void setup() {
   client.setServer(mqtt_server, mqtt_port);
   client.setCallback(callback);
 
-
   configTime(UTC_OFFSET * 3600, UTC_OFFSET_DST, NTP_SERVER);
 
   pinMode(13, OUTPUT);
+  pinMode(led, OUTPUT);
+  
   myservo.attach(13, 544, 2400); // Servo
   digitalWrite(13, LOW);
 }
@@ -131,16 +142,18 @@ void loop() {
 void relayControl() {
   int setTime = timeInSec(setHour, setMinute, setSec);
   int realTime = timeInSec(hr, minute, sec);
-
-  if (realTime >= setTime ) {
-    myservo.write(180);
-    Serial.println("Turn off the relay");
+  if (!onSet) {
+    if (realTime >= setTime ) {
+      myservo.write(180);
+      digitalWrite(led, LOW);
+      Serial.println("Timer on");
+    }
+    if (realTime >= setTime + 10 && realTime <= setTime + 11) {
+      myservo.write(0);
+      digitalWrite(led, HIGH);
+      Serial.println("Timer off");
+    }
   }
-  if (realTime >= setTime + 10 && realTime <= setTime + 11) {
-    myservo.write(0);
-    Serial.println("Turn on the relay");
-  }
-
 }
 
 int timeInSec(int hr, int minute, int sec) {
