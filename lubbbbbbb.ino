@@ -198,6 +198,21 @@ void printDetectionStatus(bool detected) {
     oled.setTextColor(WHITE, BLACK);
     oled.println("Not Detected");
   }
+  
+  oled.setTextColor(WHITE, BLACK); // Set text color to white on a black background
+  oled.setCursor(0, 45); // Set cursor position
+  oled.setTextSize(1); // Set text size
+  oled.print("Timer mode : ");
+
+  oled.setCursor(75, 45); // Set cursor position for detection status
+  oled.setTextSize(1); // Set text size for detection status
+  if (onSet == 1) {
+    oled.setTextColor(WHITE, BLACK);
+    oled.println("ON");
+  } else {
+    oled.setTextColor(WHITE, BLACK);
+    oled.println("OFF");
+  }
   oled.display(); // Display the content
   delay(100);
   oled.clearDisplay();
