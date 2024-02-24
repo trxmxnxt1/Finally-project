@@ -49,8 +49,6 @@ int setHour, setMinute, setSec, onSet;
 int hr, minute, sec;
 char msg[1000];
 
-
-
 void setup() {
   Serial.begin(115200); // Open Serial Monitor
   client.setServer(mqtt_server, mqtt_port);
@@ -172,8 +170,6 @@ void callback(char* topic, byte* payload, unsigned int length) {
     Serial.println("Feed complete");
   }
 }
-
-
 
 void printTime() {
   timeClient.update();
