@@ -140,7 +140,6 @@ void callback(char* topic, byte* payload, unsigned int length) {
       onSet = 1;
       digitalWrite(led, HIGH);
       Serial.println("Timer mode on");
-      delay(100);
     } else {
       onSet = 0;
       digitalWrite(led, LOW);
@@ -225,6 +224,7 @@ void loop() {
       ledState = 0;
       Serial.println("Switch 1 has pressed - Timer mode off");
     }
+    delay(250);
   }
 
   if (digitalRead(sw2) == LOW && currentMillis - previousMillis >= interval) {
