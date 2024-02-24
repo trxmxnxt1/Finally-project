@@ -37,7 +37,7 @@ int sw1 = 33;
 int sw2 = 25;
 int sw3 = 26;
 int sw4 = 27;
-
+bool servo;
 int ledState = 0; // เพิ่มตัวแปรเพื่อเก็บสถานะ LED
 
 Servo myservo;
@@ -164,10 +164,10 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
   }
   if (String(topic) == "@msg/timer/servo") {
-    checkSwitches(1);
+    servo = 1;
     Serial.println("Feed the fish");
   } else {
-    checkSwitches(0);
+    servo = 0;
     Serial.println("Feed complete");
   }
 }
@@ -204,8 +204,6 @@ void printDetectionStatus(bool detected) {
   oled.clearDisplay();
 }
 
-bool servo;
-
 void loop() {
   if (!client.connected()) {
     reconnect();
@@ -220,10 +218,12 @@ void loop() {
       onSet = 1;
       digitalWrite(led, 1);
       ledState = 1;
+      Serial.println("Switch 1 has pressed - Timer mode on");
     } else {
       onSet = 0;
       digitalWrite(led, 0);
       ledState = 0;
+      Serial.println("Switch 1 has pressed - Timer mode off");
     }
   }
 
@@ -276,7 +276,6 @@ void loop() {
 
 void relayControl() {
 
-  checkSwitches(0);
   int setTime = timeInSec(setHour, setMinute, setSec);
   int realTime = timeInSec(hr, minute, sec);
   if (!onSet) {
