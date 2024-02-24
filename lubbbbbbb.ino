@@ -37,9 +37,8 @@ int sw1 = 33;
 int sw2 = 25;
 int sw3 = 26;
 int sw4 = 27;
-int buttonState = 0;
-int lastButtonState = 0;
-int ledState = LOW; // เพิ่มตัวแปรเพื่อเก็บสถานะ LED
+
+int ledState = 0; // เพิ่มตัวแปรเพื่อเก็บสถานะ LED
 
 Servo myservo;
 int servoPin = 13;
@@ -105,7 +104,7 @@ void connectWiFi() {
 }
 
 void reconnect() {
-  
+
   while (!client.connected()) {
     Serial.print("Attempting MQTT connection…");
     if (client.connect(mqtt_Client, mqtt_username, mqtt_password)) {
@@ -207,41 +206,40 @@ void checkSwitches(bool servo) {
   unsigned long currentMillis = millis(); // อ่านค่าเวลาปัจจุบัน
   // ตรวจสอบว่ามีการกดสวิตซ์หรือไม่และเวลาผ่านไปตามระยะเวลาที่กำหนดหรือไม่
 
-  buttonState = digitalRead(sw1);
-
-  // Check if the button is pressed
-  if (buttonState != lastButtonState) {
-    // If the button state has changed, toggle the LED state
-    if (buttonState == LOW) {
-      ledState = !ledState;
-      digitalWrite(led, ledState);
-      onSet = ledState;
-      Serial.println("sw1 has pressed - Timer mode on");
+if (digitalRead(sw1) == LOW) {
+    if (ledState == 0) {
+      onSet = 1;
+      digitalWrite(led, 1);
+      ledState = 1;
+    } else {
+      onSet = 0;
+      digitalWrite(led, 0);
+      ledState = 0;
     }
   }
 
-    if (digitalRead(sw2) == LOW && currentMillis - previousMillis >= interval) {
-      myservo.write(180); // กำหนดให้ servo หมุนไปที่ 180 องศา
-      previousMillis = currentMillis; // บันทึกค่าเวลาปัจจุบัน
-      Serial.println("SW2 pressed");
+  if (digitalRead(sw2) == LOW && currentMillis - previousMillis >= interval) {
+    myservo.write(180); // กำหนดให้ servo หมุนไปที่ 180 องศา
+    previousMillis = currentMillis; // บันทึกค่าเวลาปัจจุบัน
+    Serial.println("SW2 pressed");
 
-    }
-
-    if (digitalRead(sw3) == LOW && currentMillis - previousMillis >= interval) {
-      myservo.write(0); // กำหนดให้ servo หมุนไปที่ 0 องศา
-      previousMillis = currentMillis; // บันทึกค่าเวลาปัจจุบัน
-      Serial.println("SW3 pressed");
-    }
-
-    if ((digitalRead(sw4) == LOW || servo ) && currentMillis - previousMillis >= interval) {
-      myservo.write(180); // กำหนดให้ servo หมุนไปที่ 180 องศา
-      delay(1800); // รอเป็นเวลา 1.8 วินาที
-      myservo.write(0); // กำหนดให้ servo หมุนกลับไปที่ 0 องศา
-      previousMillis = currentMillis; // บันทึกค่าเวลาปัจจุบัน
-      Serial.println("SW4 pressed");
-
-    }
   }
+
+  if (digitalRead(sw3) == LOW && currentMillis - previousMillis >= interval) {
+    myservo.write(0); // กำหนดให้ servo หมุนไปที่ 0 องศา
+    previousMillis = currentMillis; // บันทึกค่าเวลาปัจจุบัน
+    Serial.println("SW3 pressed");
+  }
+
+  if ((digitalRead(sw4) == LOW || servo ) && currentMillis - previousMillis >= interval) {
+    myservo.write(180); // กำหนดให้ servo หมุนไปที่ 180 องศา
+    delay(1800); // รอเป็นเวลา 1.8 วินาที
+    myservo.write(0); // กำหนดให้ servo หมุนกลับไปที่ 0 องศา
+    previousMillis = currentMillis; // บันทึกค่าเวลาปัจจุบัน
+    Serial.println("SW4 pressed");
+
+  }
+}
 
 void loop() {
 
