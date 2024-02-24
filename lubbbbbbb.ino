@@ -10,8 +10,8 @@
 
 Adafruit_SH1106 oled(21, 22); // Specify the correct pins for SDA and SCK
 
-char ssid[] = "Luv";
-char pass[] = "12345678";
+char ssid[] = "thiramanat_2.4G";
+char pass[] = "newin11111";
 
 const char* mqtt_server = "broker.netpie.io";
 const int mqtt_port = 1883;
@@ -37,7 +37,9 @@ int sw1 = 33;
 int sw2 = 25;
 int sw3 = 26;
 int sw4 = 27;
-bool buttonState = false;
+int buttonState = 0;
+int lastButtonState = 0;
+int ledState = LOW; // เพิ่มตัวแปรเพื่อเก็บสถานะ LED
 
 Servo myservo;
 int servoPin = 13;
@@ -48,7 +50,7 @@ int setHour, setMinute, setSec, onSet;
 int hr, minute, sec;
 char msg[1000];
 
-bool ledState = LOW; // เพิ่มตัวแปรเพื่อเก็บสถานะ LED
+
 
 void setup() {
   Serial.begin(115200); // Open Serial Monitor
@@ -103,6 +105,7 @@ void connectWiFi() {
 }
 
 void reconnect() {
+  
   while (!client.connected()) {
     Serial.print("Attempting MQTT connection…");
     if (client.connect(mqtt_Client, mqtt_username, mqtt_password)) {
@@ -121,7 +124,7 @@ void reconnect() {
     }
   }
 }
-bool tiMer;
+
 void callback(char* topic, byte* payload, unsigned int length) {
   Serial.print("Message arrived [");
   Serial.print(topic);
@@ -130,12 +133,10 @@ void callback(char* topic, byte* payload, unsigned int length) {
   for (int i = 0; i < length; i++) {
     message = message + (char)payload[i];
   }
-  //tiMer = false ;
-  switchesOne(tiMer);
 
   // print arrive msg
   if (strcmp(topic, "@msg/timer/onSet") == 0) {
-    if ((message == "on" || tiMer)) {
+    if (message == "on") {
       onSet = 1;
       digitalWrite(led, HIGH);
       Serial.println("Timer mode on");
@@ -202,56 +203,45 @@ void printDetectionStatus(bool detected) {
   oled.clearDisplay();
 }
 
-void switchesOne(bool tiMer) {
-  if (tiMer == 1) {
-    onSet = 1;
-    Serial.println(onSet);
-  } else {
-    if (tiMer == 0) {
-      onSet = 0;
-      Serial.println(onSet);
-    }
-  }
-}
-
 void checkSwitches(bool servo) {
   unsigned long currentMillis = millis(); // อ่านค่าเวลาปัจจุบัน
   // ตรวจสอบว่ามีการกดสวิตซ์หรือไม่และเวลาผ่านไปตามระยะเวลาที่กำหนดหรือไม่
 
-  if (!digitalRead(sw1)) {
-    if (!buttonState) {
-      switchesOne(1);
-      digitalWrite(led, HIGH);
+  buttonState = digitalRead(sw1);
+
+  // Check if the button is pressed
+  if (buttonState != lastButtonState) {
+    // If the button state has changed, toggle the LED state
+    if (buttonState == LOW) {
+      ledState = !ledState;
+      digitalWrite(led, ledState);
+      onSet = ledState;
       Serial.println("sw1 has pressed - Timer mode on");
-    } else {
-      switchesOne(0);
-      digitalWrite(led, LOW);
-      Serial.println("SW1 has pressed - Timer mode off");
     }
   }
 
-  if (digitalRead(sw2) == LOW && currentMillis - previousMillis >= interval) {
-    myservo.write(180); // กำหนดให้ servo หมุนไปที่ 180 องศา
-    previousMillis = currentMillis; // บันทึกค่าเวลาปัจจุบัน
-    Serial.println("SW2 pressed");
+    if (digitalRead(sw2) == LOW && currentMillis - previousMillis >= interval) {
+      myservo.write(180); // กำหนดให้ servo หมุนไปที่ 180 องศา
+      previousMillis = currentMillis; // บันทึกค่าเวลาปัจจุบัน
+      Serial.println("SW2 pressed");
 
+    }
+
+    if (digitalRead(sw3) == LOW && currentMillis - previousMillis >= interval) {
+      myservo.write(0); // กำหนดให้ servo หมุนไปที่ 0 องศา
+      previousMillis = currentMillis; // บันทึกค่าเวลาปัจจุบัน
+      Serial.println("SW3 pressed");
+    }
+
+    if ((digitalRead(sw4) == LOW || servo ) && currentMillis - previousMillis >= interval) {
+      myservo.write(180); // กำหนดให้ servo หมุนไปที่ 180 องศา
+      delay(1800); // รอเป็นเวลา 1.8 วินาที
+      myservo.write(0); // กำหนดให้ servo หมุนกลับไปที่ 0 องศา
+      previousMillis = currentMillis; // บันทึกค่าเวลาปัจจุบัน
+      Serial.println("SW4 pressed");
+
+    }
   }
-
-  if (digitalRead(sw3) == LOW && currentMillis - previousMillis >= interval) {
-    myservo.write(0); // กำหนดให้ servo หมุนไปที่ 0 องศา
-    previousMillis = currentMillis; // บันทึกค่าเวลาปัจจุบัน
-    Serial.println("SW3 pressed");
-  }
-
-  if ((digitalRead(sw4) == LOW || servo ) && currentMillis - previousMillis >= interval) {
-    myservo.write(180); // กำหนดให้ servo หมุนไปที่ 180 องศา
-    delay(1800); // รอเป็นเวลา 1.8 วินาที
-    myservo.write(0); // กำหนดให้ servo หมุนกลับไปที่ 0 องศา
-    previousMillis = currentMillis; // บันทึกค่าเวลาปัจจุบัน
-    Serial.println("SW4 pressed");
-
-  }
-}
 
 void loop() {
 
@@ -263,7 +253,7 @@ void loop() {
   printLocalTime();
   relayControl();
   printTime();
-
+  Serial.println(onSet);
 
   Serial.println(String(hr) + ":" + String(minute) + ":" + String(sec));
   String dateTime = "{\"data\": {\"hr\":" + String(hr) + ", \"min\":" + String(minute) + ", \"sec\": " +  String(sec) + ", \"from\": \"Thiramanat1\"" + "}}";
