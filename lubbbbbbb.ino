@@ -243,11 +243,12 @@ void loop() {
       Serial.println("Switch 1 has pressed - Timer mode off");
       delay(100);
     }
-    
+
   }
 
   if (digitalRead(sw2) == LOW && currentMillis - previousMillis >= interval) {
     myservo.write(180); // กำหนดให้ servo หมุนไปที่ 180 องศา
+    buzzForDuration(100); // เรียกใช้งาน buzzer เป็นเวลา 0.1 วินาที
     previousMillis = currentMillis; // บันทึกค่าเวลาปัจจุบัน
     Serial.println("SW2 pressed");
 
@@ -255,14 +256,17 @@ void loop() {
 
   if (digitalRead(sw3) == LOW && currentMillis - previousMillis >= interval) {
     myservo.write(0); // กำหนดให้ servo หมุนไปที่ 0 องศา
+    buzzForDuration(100); // เรียกใช้งาน buzzer เป็นเวลา 0.1 วินาที
     previousMillis = currentMillis; // บันทึกค่าเวลาปัจจุบัน
     Serial.println("SW3 pressed");
   }
 
   if ((digitalRead(sw4) == LOW || servo ) && currentMillis - previousMillis >= interval) {
     myservo.write(180); // กำหนดให้ servo หมุนไปที่ 180 องศา
+    buzzForDuration(100); // เรียกใช้งาน buzzer เป็นเวลา 0.1 วินาที
     delay(1800); // รอเป็นเวลา 1.8 วินาที
     myservo.write(0); // กำหนดให้ servo หมุนกลับไปที่ 0 องศา
+    buzzForDuration(100); // เรียกใช้งาน buzzer เป็นเวลา 0.1 วินาที
     previousMillis = currentMillis; // บันทึกค่าเวลาปัจจุบัน
     Serial.println("SW4 pressed");
 
