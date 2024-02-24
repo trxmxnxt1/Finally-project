@@ -74,6 +74,8 @@ void setup() {
   digitalWrite(buzzer, LOW);
   // END Buzzer
 
+  sec += 1;
+
   // Start OLED
   oled.begin(SH1106_SWITCHCAPVCC, 0x3C);
   oled.clearDisplay(); // Clear the display
@@ -198,7 +200,7 @@ void printDetectionStatus(bool detected) {
     oled.setTextColor(WHITE, BLACK);
     oled.println("Not Detected");
   }
-  
+
   oled.setTextColor(WHITE, BLACK); // Set text color to white on a black background
   oled.setCursor(0, 45); // Set cursor position
   oled.setTextSize(1); // Set text size
@@ -233,13 +235,15 @@ void loop() {
       digitalWrite(led, 1);
       ledState = 1;
       Serial.println("Switch 1 has pressed - Timer mode on");
+      delay(100);
     } else {
       onSet = 0;
       digitalWrite(led, 0);
       ledState = 0;
       Serial.println("Switch 1 has pressed - Timer mode off");
+      delay(100);
     }
-    delay(250);
+    
   }
 
   if (digitalRead(sw2) == LOW && currentMillis - previousMillis >= interval) {
