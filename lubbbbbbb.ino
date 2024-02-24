@@ -32,7 +32,7 @@ PubSubClient client(espClient);
 #define led 18
 int sensorPin = 32; // TCRT5000
 int threshold = 500; // กำหนดค่าสะสมต่ำสุดที่ถือว่าตรวจจับได้
-t
+
 int sw1 = 33;
 int sw2 = 25;
 int sw3 = 26;
