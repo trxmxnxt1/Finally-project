@@ -208,7 +208,7 @@ void checkSwitches(bool servo) {
   unsigned long currentMillis = millis(); // อ่านค่าเวลาปัจจุบัน
   // ตรวจสอบว่ามีการกดสวิตซ์หรือไม่และเวลาผ่านไปตามระยะเวลาที่กำหนดหรือไม่
 
-if (digitalRead(sw1) == LOW) {
+  if (digitalRead(sw1) == LOW) {
     if (ledState == 0) {
       onSet = 1;
       digitalWrite(led, 1);
