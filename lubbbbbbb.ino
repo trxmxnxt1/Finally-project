@@ -204,7 +204,14 @@ void printDetectionStatus(bool detected) {
   oled.clearDisplay();
 }
 
-void checkSwitches(bool servo) {
+bool servo;
+
+void loop() {
+  if (!client.connected()) {
+    reconnect();
+  }
+
+  client.loop();
   unsigned long currentMillis = millis(); // อ่านค่าเวลาปัจจุบัน
   // ตรวจสอบว่ามีการกดสวิตซ์หรือไม่และเวลาผ่านไปตามระยะเวลาที่กำหนดหรือไม่
 
@@ -241,15 +248,6 @@ void checkSwitches(bool servo) {
     Serial.println("SW4 pressed");
 
   }
-}
-
-void loop() {
-
-  if (!client.connected()) {
-    reconnect();
-  }
-
-  client.loop();
   printLocalTime();
   relayControl();
   printTime();
@@ -283,18 +281,18 @@ void relayControl() {
   int realTime = timeInSec(hr, minute, sec);
   if (!onSet) {
     if (realTime <= setTime ) {
-      checkSwitches(0);
+      servo = 0;
       digitalWrite(led, HIGH);
       Serial.println("Real time");
       // เรียกใช้ฟังก์ชันให้ buzzer ทำงานเมื่อ servo หมุนที่ 180 องศา
     }
     if (realTime == setTime && realTime >= setTime <= 4) {
-      checkSwitches(1);
+      servo = 1;
       digitalWrite(led, LOW);
       Serial.println("Set time");
     }
     else {
-      checkSwitches(0);
+      servo = 0;
       Serial.println("None time");
     }
   }
