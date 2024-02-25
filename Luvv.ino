@@ -133,7 +133,16 @@ void callback(char* topic, byte* payload, unsigned int length) {
   for (int i = 0; i < length; i++) {
     message = message + (char)payload[i];
   }
-
+  
+  if (String(topic) == "@msg/timer/servo") {
+    Serial.println("Feed the fish");
+    myservo.write(180); // กำหนดให้ servo หมุนไปที่ 180 องศา
+    buzzForDuration(100); // เรียกใช้งาน buzzer เป็นเวลา 0.1 วินาที
+    delay(1800); // รอเป็นเวลา 1.8 วินาที
+    myservo.write(0); // กำหนดให้ servo หมุนกลับไปที่ 0 องศา
+    buzzForDuration(100); // เรียกใช้งาน buzzer เป็นเวลา 0.1 วินาที
+  }
+  
   // print arrive msg
   if (strcmp(topic, "@msg/timer/onSet") == 0) {
     if (message == "on") {
@@ -162,13 +171,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
     }
 
   }
-  if (String(topic) == "@msg/timer/servo") {
-    servo = 1;
-    Serial.println("Feed the fish");
-  } else {
-    servo = 0;
-    Serial.println("Feed complete");
-  }
+  
 }
 
 void printTime() {
@@ -227,7 +230,7 @@ void loop() {
   printLocalTime();
   relayControl();
   printTime();
-  
+
   if (digitalRead(sw1) == LOW) {
     if (ledState == 0) {
       onSet = 1;
