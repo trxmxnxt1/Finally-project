@@ -72,7 +72,7 @@ void setup() {
   digitalWrite(buzzer, LOW);
   // END Buzzer
 
-  sec += 1;
+  sec += 6;
 
   // Start OLED
   oled.begin(SH1106_SWITCHCAPVCC, 0x3C);
@@ -224,7 +224,10 @@ void loop() {
   client.loop();
   unsigned long currentMillis = millis(); // อ่านค่าเวลาปัจจุบัน
   // ตรวจสอบว่ามีการกดสวิตซ์หรือไม่และเวลาผ่านไปตามระยะเวลาที่กำหนดหรือไม่
-
+  printLocalTime();
+  relayControl();
+  printTime();
+  
   if (digitalRead(sw1) == LOW) {
     if (ledState == 0) {
       onSet = 1;
@@ -267,9 +270,7 @@ void loop() {
     Serial.println("SW4 pressed");
 
   }
-  printLocalTime();
-  relayControl();
-  printTime();
+
   Serial.println(onSet);
 
   Serial.println(String(hr) + ":" + String(minute) + ":" + String(sec));
@@ -300,13 +301,11 @@ void relayControl() {
   if (!onSet) {
     if (realTime <= setTime ) {
       servo = 0;
-      digitalWrite(led, HIGH);
       Serial.println("Real time");
       // เรียกใช้ฟังก์ชันให้ buzzer ทำงานเมื่อ servo หมุนที่ 180 องศา
     }
-    if (realTime == setTime && realTime >= setTime <= 4) {
+     if (realTime >= setTime && realTime <= setTime + 5) {
       servo = 1;
-      digitalWrite(led, LOW);
       Serial.println("Set time");
     }
     else {
